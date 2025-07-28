@@ -99,8 +99,10 @@ namespace LuckyOffice.Controllers
                     workbook.Save(finalStream, SaveFormat.Xlsx);
                     finalStream.Position = 0;
 
+                    byte[] fileBytes = await Task.Run(() => finalStream.ToArray());
+
                     string outputFileName = Path.GetFileNameWithoutExtension(fileName) + $"-{DateTime.Now:yyyyMMdd_HHmmss}" + ".xlsx";
-                    return File(finalStream.ToArray(),
+                    return File(fileBytes,
                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                 outputFileName);
                 }

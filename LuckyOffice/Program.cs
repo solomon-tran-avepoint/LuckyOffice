@@ -1,37 +1,53 @@
+﻿using LuckyOffice.Utility;
+using System.Diagnostics;
+
 namespace LuckyOffice
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+            var port = SocketHelper.GetAvailablePort(5000);
+
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Apply the available port to the server URL — this is essential
+            if (builder.Environment.IsProduction())
+            {
+                builder.WebHost.UseUrls($"http://localhost:{port}");
+            }
+
+            // Add services
             builder.Services.AddControllersWithViews();
-            
-            // Add HttpClient for downloading files from URLs
             builder.Services.AddHttpClient();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Middleware pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+                app.UseHttpsRedirection();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            // Open browser only in production
+            if (app.Environment.IsProduction())
+            {
+                app.Lifetime.ApplicationStarted.Register(() =>
+                {
+                    var url = $"http://localhost:{port}";
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                });
+            }
 
             app.Run();
         }
