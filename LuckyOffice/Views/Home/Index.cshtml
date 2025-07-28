@@ -1,0 +1,124 @@
+﻿@using LuckyOffice.Common
+
+@{
+    ViewData["Title"] = "Chuyển đổi Excel";
+}
+@model LuckyOffice.Models.UploadFileViewModel
+
+@{
+    var excelExtensions = ExcelConstants.SupportedExtensions;
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+
+    @if (!string.IsNullOrEmpty(ViewBag.Message))
+    {
+        <div class="alert alert-info" role="alert">@ViewBag.Message</div>
+    }
+
+    <form asp-action="Convert" asp-controller="Home" method="post" enctype="multipart/form-data">
+        <!-- File Upload Section -->
+        <div class="mb-4" id="fileUploadSection">
+            <label for="ExcelFiles" class="form-label fw-bold">Chọn tệp Excel (có thể chọn nhiều tệp):</label>
+
+            <div class="input-group">
+                <label class="input-group-text btn btn-outline-secondary" for="ExcelFiles" id="fileSelectButton">Chọn tệp</label>
+                <input type="file" class="form-control d-none" id="ExcelFiles" name="ExcelFiles"
+                       accept=".xls,.xlsx,.xlsm,.xlsb,.csv,.xlt,.xltx" multiple
+                       onchange="handleFileSelection();" />
+                <span class="form-control" id="fileNameDisplay">Chưa chọn tệp nào</span>
+                <button type="button" class="btn btn-outline-danger" id="clearFileButton" onclick="clearFileSelection();" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <span asp-validation-for="ExcelFiles" class="text-danger"></span>
+
+            <div class="mt-2">
+                <small class="text-muted">Mẹo: Giữ Ctrl (Windows) hoặc Cmd (Mac) để chọn nhiều tệp.</small>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="convertButton" disabled>
+            <i class="fas fa-download me-2"></i>Chuyển đổi và Tải xuống
+        </button>
+    </form>
+
+    <div class="mt-4">
+        <small class="text-muted">Định dạng được hỗ trợ:</small><br />
+        @foreach (var ext in excelExtensions)
+        {
+            <span class="badge bg-secondary me-1">@ext</span>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        let hasFiles = false;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateFormState();
+        });
+
+        function handleFileSelection() {
+            const input = document.getElementById('ExcelFiles');
+            const display = document.getElementById('fileNameDisplay');
+            const clearButton = document.getElementById('clearFileButton');
+
+            hasFiles = input.files.length > 0;
+
+            if (hasFiles) {
+                display.textContent = input.files.length === 1
+                    ? input.files[0].name
+                    : `Đã chọn ${input.files.length} tệp`;
+                clearButton.style.display = 'block';
+            } else {
+                display.textContent = 'Chưa chọn tệp nào';
+                clearButton.style.display = 'none';
+            }
+
+            updateFormState();
+        }
+
+        function clearFileSelection() {
+            const input = document.getElementById('ExcelFiles');
+            const display = document.getElementById('fileNameDisplay');
+            const clearButton = document.getElementById('clearFileButton');
+
+            input.value = '';
+            display.textContent = 'Chưa chọn tệp nào';
+            clearButton.style.display = 'none';
+            hasFiles = false;
+
+            updateFormState();
+        }
+
+        function updateFormState() {
+            const convertButton = document.getElementById('convertButton');
+            convertButton.disabled = !hasFiles;
+        }
+
+        document.getElementById('fileSelectButton').addEventListener('click', function (e) {
+            if (this.classList.contains('disabled')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+
+    <style>
+        .disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        #clearFileButton {
+            transition: all 0.2s ease;
+        }
+    </style>
+}
