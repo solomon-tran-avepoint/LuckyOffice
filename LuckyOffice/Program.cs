@@ -7,15 +7,15 @@ namespace LuckyOffice
     {
         public static void Main(string[] args)
         {
-            var port = SocketHelper.GetAvailablePort(5000);
+            // var port = SocketHelper.GetAvailablePort(5000);
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // Apply the available port to the server URL — this is essential
-            if (builder.Environment.IsProduction())
-            {
-                builder.WebHost.UseUrls($"http://localhost:{port}");
-            }
+            // // Apply the available port to the server URL — this is essential
+            // if (builder.Environment.IsProduction())
+            // {
+            //     builder.WebHost.UseUrls($"http://localhost:{port}");
+            // }
 
             // Add services
             builder.Services.AddControllersWithViews();
@@ -40,14 +40,14 @@ namespace LuckyOffice
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             // Open browser only in production
-            if (app.Environment.IsProduction())
-            {
-                app.Lifetime.ApplicationStarted.Register(() =>
-                {
-                    var url = $"http://localhost:{port}";
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-                });
-            }
+            // if (app.Environment.IsProduction())
+            // {
+            //     app.Lifetime.ApplicationStarted.Register(() =>
+            //     {
+            //         var url = $"http://localhost:{port}";
+            //         Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            //     });
+            // }
 
             app.Run();
         }
